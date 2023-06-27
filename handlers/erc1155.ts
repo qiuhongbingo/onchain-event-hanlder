@@ -3,9 +3,9 @@ import { EventLog } from '../types'
 import dayjs from 'dayjs'
 import fs from 'fs'
 
-export const handleEvents = async (events: EventLog[]) => {
-  const res = []
+const res: any = []
 
+export const handleEvents = async (events: EventLog[]) => {
   for (const { subKind, log } of events) {
     const eventData = getEventData(subKind)
     const parsedLog = eventData.abi.parseLog(log)
@@ -20,46 +20,46 @@ export const handleEvents = async (events: EventLog[]) => {
 
     switch (subKind) {
       case 'erc1155-transfer-single': {
-        const nftTokenId = parsedLog.args['tokenId'].toString()
-        const amountRaw = parsedLog.args['amount'].toString()
+        const nftTokenId = parsedLog.args['tokenId']
+        const amountRaw = parsedLog.args['amount']
 
         res.push({
-          blockTimestamp: log.blockTimestamp,
-          blockDate: dayjs(log.blockTimestamp).format('YYYY-MM-DD'),
-          amountRaw,
-          collectionContractAddress: log.address,
+          transaction_hash: log.transactionHash,
+          log_index: log.logIndex + '',
+          internal_index: '0',
+          block_timestamp: log.blockTimestamp + '',
+          block_date: dayjs(log.blockTimestamp).format('YYYY-MM-DD'),
+          block_number: log.blockNumber + '',
           chain: 'Ethereum',
-          transactionHash: log.transactionHash,
-          logIndex: log.logIndex,
-          nftTokenId,
-          blockNumber: log.blockNumber,
-          fromAddress,
-          toAddress,
-          internalIndex: 0,
-          transferType,
+          collection_contract_address: log.address,
+          nft_token_id: nftTokenId + '',
+          amount_raw: amountRaw,
+          from_address: fromAddress,
+          to_address: toAddress,
+          transfer_type: transferType,
         })
         break
       }
       case 'erc1155-transfer-batch': {
-        const nftTokenIds = parsedLog.args['tokenIds'].map(String)
-        const amountRaws = parsedLog.args['amounts'].map(String)
+        const nftTokenIds = parsedLog.args['tokenIds']
+        const amountRaws = parsedLog.args['amounts']
 
         const count = Math.min(nftTokenIds.length, amountRaws.length)
         for (let i = 0; i < count; i++) {
           res.push({
-            blockTimestamp: log.blockTimestamp,
-            blockDate: dayjs(log.blockTimestamp).format('YYYY-MM-DD'),
-            amountRaw: amountRaws[i],
-            collectionContractAddress: log.address,
+            transaction_hash: log.transactionHash,
+            log_index: log.logIndex + '',
+            internal_index: '0',
+            block_timestamp: log.blockTimestamp + '',
+            block_date: dayjs(log.blockTimestamp).format('YYYY-MM-DD'),
+            block_number: log.blockNumber + '',
             chain: 'Ethereum',
-            transactionHash: log.transactionHash,
-            logIndex: log.logIndex,
-            nftTokenId: nftTokenIds[i],
-            blockNumber: log.blockNumber,
-            fromAddress,
-            toAddress,
-            internalIndex: 0,
-            transferType,
+            collection_contract_address: log.address,
+            nft_token_id: nftTokenIds[i] + '',
+            amount_raw: amountRaws[i] + '',
+            from_address: fromAddress,
+            to_address: toAddress,
+            transfer_type: transferType,
           })
         }
         break

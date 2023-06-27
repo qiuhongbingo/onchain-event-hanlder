@@ -5,6 +5,7 @@ import erc721Transfer from './inputs/erc721-transfer.json'
 import erc1155TransferSingle from './inputs/erc1155-transfer-single.json'
 import erc1155TransferBatch from './inputs/erc1155-transfer-batch.json'
 import seaportV15OrderFilled from './inputs/seaport-v1.5-order-filled.json'
+import seaportV15OrderMatched from './inputs/seaport-v1.5-order-matched.json'
 
 const formatLog = (item: any) => {
   return {
@@ -48,6 +49,13 @@ const batch: EventsBatch = {
       kind: 'seaport-v1.5',
       data: seaportV15OrderFilled.map((item) => ({
         subKind: 'seaport-v1.5-order-filled',
+        log: formatLog(item),
+      })),
+    },
+    {
+      kind: 'seaport-v1.5',
+      data: seaportV15OrderMatched.map((item) => ({
+        subKind: 'seaport-v1.5-order-matched',
         log: formatLog(item),
       })),
     },

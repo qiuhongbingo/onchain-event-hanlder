@@ -2,57 +2,69 @@ import { getEventData } from '../events'
 import { EventLog } from '../types'
 import dayjs from 'dayjs'
 import fs from 'fs'
+import { deriveBasicSale } from '../utils/deriveBasicSale'
+import { getRoyaltyRate } from '../utils/getRoyaltyRate'
+
+const res: any = []
 
 export const handleEvents = async (events: EventLog[]) => {
-  const res = []
-
+  let i = 0
   for (const { subKind, log } of events) {
     const eventData = getEventData(subKind)
-    const parsedLog = eventData.abi.parseLog(log)
 
     switch (subKind) {
       case 'seaport-v1.5-order-filled': {
-        const buyerAddress = parsedLog.args['offerer'].toLowerCase()
-        const sellerAddress = parsedLog.args['recipient'].toLowerCase()
+        const parsedLog = eventData.abi.parseLog(log)
+        const orderId = parsedLog.args['orderHash'].toLowerCase()
+        const maker = parsedLog.args['offerer'].toLowerCase()
+        let taker = parsedLog.args['recipient'].toLowerCase()
         const offer = parsedLog.args['offer']
         const consideration = parsedLog.args['consideration']
-        const amount = offer[0].amount.toString() / 1e18
-        const platformFeeAmount = consideration[1]?.amount.toString() / 1e18
 
-        res.push({
-          chain: 'Ethereum',
-          numberOfNftTokenId: consideration[0].amount.toString(),
-          nftTokenId: consideration[0].identifier.toString(),
-          // royaltyRate: null,
-          amount,
-          // ethAmount: null,
-          // royaltyAmount: null,
-          // value: null,
-          internalIndex: 0,
-          // royaltyValue: null,
-          // valueCurrency: null,
-          blockTimestamp: log.blockTimestamp,
-          platformFeeRate: Number((platformFeeAmount / amount).toFixed(3)),
-          platformFeeAmount,
-          transactionHash: log.transactionHash,
-          logIndex: log.logIndex,
-          // platformFeesValue: null,
-          blockDate: dayjs(log.blockTimestamp).format('YYYY-MM-DD'),
-          blockNumber: log.blockNumber,
-          marketplaceContractAddress: log.address,
-          collectionContractAddress: consideration[0].token.toLowerCase(),
-          // collectionSlug: null,
-          marketplaceSlug: 'opensea',
-          // amountCurrency: null,
-          amountCurrencyContractAddress: offer[0].token.toLowerCase(),
-          buyerAddress,
-          sellerAddress,
-          // tradeType: null,
-        })
+        const saleInfo = deriveBasicSale(offer, consideration)
+        if (saleInfo) {
+          const amount = Number(saleInfo.price) / 1e18
+          const royaltyRate = await getRoyaltyRate(
+            saleInfo.contract,
+            saleInfo.tokenId
+          )
+
+          res.push({
+            transaction_hash: log.transactionHash,
+            log_index: log.logIndex + '',
+            internal_index: '0',
+            block_timestamp: log.blockTimestamp + '',
+            block_date: dayjs(log.blockTimestamp).format('YYYY-MM-DD'),
+            block_number: log.blockNumber + '',
+            chain: 'Ethereum',
+            marketplace_contract_address: log.address,
+            marketplaceSlug: 'opensea',
+            collection_contract_address: saleInfo.contract,
+            number_of_nft_token_id: saleInfo.amount,
+            nft_token_id: saleInfo.tokenId,
+            amount: amount + '',
+            amountCurrencyContractAddress: saleInfo.paymentToken,
+            buyer_address: saleInfo.side === 'buy' ? maker : taker,
+            seller_address: saleInfo.side === 'buy' ? taker : maker,
+            royalty_rate: royaltyRate + '',
+            royalty_amount: amount * royaltyRate + '',
+            platformFeeRate: '0.005',
+            platformFeeAmount: amount * 0.005 + '',
+            // ethAmount: null,
+            // value: null,
+            // royaltyValue: null,
+            // valueCurrency: null,
+            // platformFeesValue: null,
+            // collectionSlug: null,
+            // amountCurrency: null,
+            // tradeType: null,
+          })
+        }
         break
       }
     }
   }
+  i++
 
   fs.writeFileSync(
     process.cwd() + '/outputs/seaport-transaction.json',

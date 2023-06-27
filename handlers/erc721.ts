@@ -3,13 +3,13 @@ import { EventLog } from '../types'
 import dayjs from 'dayjs'
 import fs from 'fs'
 
-export const handleEvents = async (events: EventLog[]) => {
-  const res = []
+const res: any = []
 
+export const handleEvents = async (events: EventLog[]) => {
   for (const { subKind, log } of events) {
     const eventData = getEventData(subKind)
     const parsedLog = eventData.abi.parseLog(log)
-    const nftTokenId = parsedLog.args['tokenId'].toString()
+    const nftTokenId = parsedLog.args['tokenId']
     const fromAddress = parsedLog.args['from'].toLowerCase()
     const toAddress = parsedLog.args['to'].toLowerCase()
     const transferType =
@@ -22,19 +22,19 @@ export const handleEvents = async (events: EventLog[]) => {
     switch (subKind) {
       case 'erc721-transfer': {
         res.push({
-          blockTimestamp: log.blockTimestamp,
-          blockDate: dayjs(log.blockTimestamp).format('YYYY-MM-DD'),
-          amountRaw: '1',
-          collectionContractAddress: log.address,
+          transaction_hash: log.transactionHash,
+          log_index: log.logIndex + '',
+          internal_index: '0',
+          block_timestamp: log.blockTimestamp + '',
+          block_date: dayjs(log.blockTimestamp).format('YYYY-MM-DD'),
+          block_number: log.blockNumber + '',
           chain: 'Ethereum',
-          transactionHash: log.transactionHash,
-          logIndex: log.logIndex,
-          nftTokenId,
-          blockNumber: log.blockNumber,
-          fromAddress,
-          toAddress,
-          internalIndex: 0,
-          transferType,
+          collection_contract_address: log.address,
+          nft_token_id: nftTokenId + '',
+          amount_raw: '1',
+          from_address: fromAddress,
+          to_address: toAddress,
+          transfer_type: transferType,
         })
         break
       }

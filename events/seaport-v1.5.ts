@@ -31,3 +31,14 @@ export const orderFulfilled: EventData = {
     )`,
   ]),
 }
+
+export const ordersMatched: EventData = {
+  kind: 'seaport-v1.5',
+  subKind: 'seaport-v1.5-order-matched',
+  addresses: {
+    0x00000000000000adc04c56bf30ac9d3c0aaf14dc: true,
+  },
+  topic: '0x4b9f2d36e1b4c93de62cc077b00b1a91d84b6c31b4a14e012718dcca230689e7',
+  numTopics: 1,
+  abi: new Interface([`event OrdersMatched(bytes32[] orderHashes)`]),
+}

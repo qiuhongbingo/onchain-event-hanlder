@@ -7,7 +7,7 @@ export type EventSubKind =
   | 'erc1155-transfer-single'
   | 'erc1155-transfer-batch'
   | 'seaport-v1.5-order-filled'
-  | 'seaport-v1.5-orders-matched'
+  | 'seaport-v1.5-order-matched'
 
 export type EventData = {
   kind: EventKind
@@ -41,4 +41,28 @@ export type EventsByKind = {
 export type EventsBatch = {
   id: string
   events: EventsByKind[]
+}
+
+export enum ItemType {
+  NATIVE,
+  ERC20,
+  ERC721,
+  ERC1155,
+  ERC721_WITH_CRITERIA,
+  ERC1155_WITH_CRITERIA,
+}
+
+export type SpentItem = {
+  itemType: ItemType
+  token: string
+  identifier: string
+  amount: string
+}
+
+export type ReceivedItem = {
+  itemType: ItemType
+  token: string
+  identifier: string
+  amount: string
+  recipient: string
 }

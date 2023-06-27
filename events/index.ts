@@ -7,6 +7,7 @@ const allEventData = [
   erc1155.transferSingle,
   erc1155.transferBatch,
   seaportV15.orderFulfilled,
+  seaportV15.ordersMatched,
 ]
 
 export const getEventData = (subKind: string) => {
